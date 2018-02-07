@@ -18,7 +18,8 @@ You should not put any user code in this function besides modifying the
    ;; instead of a list then all discovered layers will be installed.
    dotspacemacs-configuration-layers
    '(
-     elpy
+     python
+     ;;elpy
      ipython-notebook
      rust
      html
@@ -45,15 +46,18 @@ You should not put any user code in this function besides modifying the
      ;; private layers
      (ess :variables
           ess-enable-smart-equals nil
-          ess-enable-smartparens t)
-     funk
-     polymode
+          ess-enable-smartparens nil)
+     ;;funk
+     ;;polymode
+     ;;smartparens-config
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages '(
+   swiper
+   ivy
    polymode
    )
    ;; A list of packages and/or extensions that will not be install and
@@ -64,6 +68,8 @@ You should not put any user code in this function besides modifying the
    ;; the list `dotspacemacs-configuration-layers'. (default t)
    dotspacemacs-delete-orphan-packages t))
 
+
+;;
 (defun dotspacemacs/init ()
   "Initialization function.
 This function is called at the very startup of Spacemacs initialization
@@ -81,6 +87,8 @@ values."
    ;; parameter `--insecure' which forces the value of this variable to
    ;; nil. (default t)
    dotspacemacs-elpa-https t
+   ;;ivy-use-virtual-buffers t
+   ;;setq enable-recursive-minibuffers t
    ;; Maximum allowed time in seconds to contact an ELPA repository.
    dotspacemacs-elpa-timeout 5
    ;; If non nil then spacemacs will check for updates at startup
@@ -330,6 +338,8 @@ any user code."
     golden-ratio
     org))
 
+;;(setq ivy-use-virtual-buffers t)
+;;(setq enable-recursive-minibuffers t)
 
 
 (defun ess/init-ess ()
@@ -450,24 +460,112 @@ any user code."
 
 (global-set-key (kbd "M-ç") 'kill-whole-line)
 
+
 (defun rmd-mode ()
   "ESS Markdown mode for rmd files"
   (interactive)
-  ;; (setq load-path 
+  ;; (setq load-path
   ;;  (append (list "path/to/polymode/" "path/to/polymode/modes/")
   ;;      load-path))
   (require 'poly-R)
-  (require 'poly-markdown)     
+  (require 'poly-markdown)
   (poly-markdown+r-mode))
 
-(defun r-chunk (header) 
-  "Insert an r-chunk in markdown mode. Necessary due to interactions between polymode and yas snippet" 
-  (interactive "sHeader: ") 
-  (insert (concat "```{r " header "}\n\n```")) 
+(defun r-chunk (header)
+  "Insert an r-chunk in markdown mode. Necessary due to interactions between polymode and yas snippet"
+  (interactive "sHeader: ")
+  (insert (concat "```{r " header "}\n\n```"))
   (forward-line -1))
 
-(global-set-key (kbd "C-'") 'r-chunk)
+(defun r-clear-workspace ()
+  (interactive)
+  (insert "rm(list=ls())")
+  (insert ~%)
+  (format t "An atom~%")
+ )
 
+(global-set-key (kbd "C-&") 'r-clear-workspace)
+
+
+(defun emacs-single-quote-left ()
+  (interactive)
+  (insert "(")
+ )
+(global-set-key (kbd "C-(") 'emacs-single-quote-left)
+
+(defun emacs-single-quote-right ()
+  (interactive)
+  (insert ")")
+ )
+(global-set-key (kbd "C-)") 'emacs-single-quote-right)
+
+
+
+(global-set-key (kbd "C-'") 'r-chunk)
+(global-set-key (kbd "M-o") 'ace-window)
+(setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+
+(setq aw-background nil)
+
+
+(defun mark-whole-word (&optional arg allow-extend)
+  "Like `mark-word', but selects whole words and skips over whitespace.
+If you use a negative prefix arg then select words backward.
+Otherwise select them forward.
+
+If cursor starts in the middle of word then select that whole word.
+
+If there is whitespace between the initial cursor position and the
+first word (in the selection direction), it is skipped (not selected).
+
+If the command is repeated or the mark is active, select the next NUM
+words, where NUM is the numeric prefix argument.  (Negative NUM
+selects backward.)"
+  (interactive "P\np")
+  (let ((num  (prefix-numeric-value arg)))
+    (unless (eq last-command this-command)
+      (if (natnump num)
+          (skip-syntax-forward "\\s-")
+        (skip-syntax-backward "\\s-")))
+    (unless (or (eq last-command this-command)
+                (if (natnump num)
+                    (looking-at "\\b")
+                  (looking-back "\\b")))
+      (if (natnump num)
+          (left-word)
+        (right-word)))
+    (mark-word arg allow-extend)))
+
+(global-set-key [remap mark-word] 'mark-whole-word)
+(global-set-key (kbd "C-h")  'mark-word)
+
+(defun clear-shell ()
+   (interactive)
+   (let ((old-max comint-buffer-maximum-size))
+     (setq comint-buffer-maximum-size 0)
+     (comint-truncate-buffer)
+     (setq comint-buffer-maximum-size old-max)))
+
+(global-set-key (kbd "C-Q")  'clear-shell)
+
+
+
+(global-set-key "\C-s" 'swiper)
+(global-set-key (kbd "C-c C-r") 'ivy-resume)
+(global-set-key (kbd "<f6>") 'ivy-resume)
+(global-set-key (kbd "M-x") 'counsel-M-x)
+(global-set-key (kbd "C-x C-f") 'counsel-find-file)
+(global-set-key (kbd "<f1> f") 'counsel-describe-function)
+(global-set-key (kbd "<f1> v") 'counsel-describe-variable)
+(global-set-key (kbd "<f1> l") 'counsel-find-library)
+(global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
+(global-set-key (kbd "<f2> u") 'counsel-unicode-char)
+(global-set-key (kbd "C-c g") 'counsel-git)
+(global-set-key (kbd "C-c j") 'counsel-git-grep)
+(global-set-key (kbd "C-c k") 'counsel-ag)
+(global-set-key (kbd "C-x l") 'counsel-locate)
+(global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
+(define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history)
 
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -479,8 +577,9 @@ any user code."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (org-mime jedi jedi-core python-environment epc concurrent elpy find-file-in-project ivy ein skewer-mode request-deferred websocket deferred js2-mode simple-httpd ghub let-alist ctable yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional helm-pydoc cython-mode company-anaconda anaconda-mode pythonic org-category-capture toml-mode racer flycheck-rust seq cargo rust-mode undo-tree winum unfill fuzzy diminish f log4e s web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data goto-chg packed evil avy markdown-mode alert bind-key bind-map magit-popup powerline request auctex company with-editor projectile org highlight dash pcache flyspell-correct async auto-complete iedit smartparens yaml-mode paradox org-plus-contrib helm-ag expand-region evil-matchit ess flycheck yasnippet helm helm-core magit spacemacs-theme zenburn-theme xterm-color ws-butler window-numbering which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spinner spaceline solarized-theme smeargle shell-pop restart-emacs rainbow-delimiters quelpa popwin polymode persp-mode pcre2el orgit org-projectile org-present org-pomodoro org-download org-bullets open-junk-file neotree mwim multi-term move-text monokai-theme mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum linum-relative link-hint julia-mode info+ indent-guide ido-vertical-mode hydra hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-company helm-c-yasnippet google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-commit gh-md flyspell-correct-helm flycheck-pos-tip flx-ido fill-column-indicator fancy-battery eyebrowse exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-object-popup ess-R-data-view eshell-z eshell-prompt-extras esh-help elisp-slime-nav dumb-jump define-word company-statistics company-auctex column-enforce-mode clean-aindent-mode auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))))
+    (org-mime jedi jedi-core python-environment epc concurrent elpy find-file-in-project ein skewer-mode request-deferred websocket deferred js2-mode simple-httpd ghub let-alist ctable yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional helm-pydoc cython-mode company-anaconda anaconda-mode pythonic org-category-capture toml-mode racer flycheck-rust seq cargo rust-mode undo-tree winum unfill fuzzy diminish f log4e s web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data goto-chg packed evil avy markdown-mode alert bind-key bind-map magit-popup powerline request auctex company with-editor projectile org highlight dash pcache flyspell-correct async auto-complete iedit smartparens yaml-mode paradox org-plus-contrib helm-ag expand-region evil-matchit ess flycheck yasnippet helm helm-core magit spacemacs-theme zenburn-theme xterm-color ws-butler window-numbering which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spinner spaceline solarized-theme smeargle shell-pop restart-emacs rainbow-delimiters quelpa popwin polymode persp-mode pcre2el orgit org-projectile org-present org-pomodoro org-download org-bullets open-junk-file neotree mwim multi-term move-text monokai-theme mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum linum-relative link-hint julia-mode info+ indent-guide ido-vertical-mode hydra hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-company helm-c-yasnippet google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-commit gh-md flyspell-correct-helm flycheck-pos-tip flx-ido fill-column-indicator fancy-battery eyebrowse exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-object-popup ess-R-data-view eshell-z eshell-prompt-extras esh-help elisp-slime-nav dumb-jump define-word company-statistics company-auctex column-enforce-mode clean-aindent-mode auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))))
 (custom-set-faces
+ ;; custom-set-faces was added by Custom.
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
