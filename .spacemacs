@@ -18,6 +18,7 @@ You should not put any user code in this function besides modifying the
    ;; instead of a list then all discovered layers will be installed.
    dotspacemacs-configuration-layers
    '(
+     javascript
      python
      ;;elpy
      ipython-notebook
@@ -59,6 +60,17 @@ You should not put any user code in this function besides modifying the
    swiper
    ivy
    polymode
+   better-defaults
+   jedi
+   material-theme
+   elpy
+   py-autopep8
+   hardcore-mode
+   emojify
+   browse-kill-ring
+   ov
+   key-chord
+   multiple-cursors
    )
    ;; A list of packages and/or extensions that will not be install and
    ;; loaded.
@@ -66,7 +78,46 @@ You should not put any user code in this function besides modifying the
    ;; If non-nil spacemacs will delete any orphan packages, i.e.
    ;; packages that are declared in a layer which is not a member of
    ;; the list `dotspacemacs-configuration-layers'. (default t)
-   dotspacemacs-delete-orphan-packages t))
+   dotspacemacs-delete-orphan-packages nil))
+
+
+;; source: http://steve.yegge.googlepages.com/my-dot-emacs-file
+(defun rename-file-and-buffer (new-name)
+  "Renames both current buffer and file it's visiting to NEW-NAME."
+  (interactive "sNew name: ")
+  (let ((name (buffer-name))
+        (filename (buffer-file-name)))
+    (if (not filename)
+        (message "Buffer '%s' is not visiting a file!" name)
+      (if (get-buffer new-name)
+          (message "A buffer named '%s' already exists!" new-name)
+        (progn
+          (rename-file filename new-name 1)
+          (rename-buffer new-name)
+          (set-visited-file-name new-name)
+          (set-buffer-modified-p nil))))))
+
+
+
+(defvar myPackages
+  '(better-defaults
+    ein ;; add the ein package (Emacs ipython notebook)
+    elpy
+    flycheck
+    material-theme
+    py-autopep8))
+
+
+  (when (require 'flycheck nil t)
+  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+  (add-hook 'elpy-mode-hook 'flycheck-mode))
+
+(setq save-abbrevs t)
+(setq save-abbrevs 'silently)
+(setq hardcore-mode t)
+
+
+(add-hook 'after-init-hook #'global-emojify-mode)
 
 
 ;;
@@ -324,11 +375,54 @@ any user code."
 (add-to-list 'auto-mode-alist '("\\.slim$" . poly-slim-mode))
 
 (provide 'polymode-configuration)
-
-
   )
 
 
+;; let make a cool command :)
+;; newline-without-break-of-line
+(defun newline-without-break-of-line ()
+
+  "1. move to the begining  of the line.
+    2. insert newline with index"
+
+  (interactive)
+  (let ((oldpos (point)))
+    (end-of-line)
+    (newline-and-indent)))
+(global-set-key (kbd "C-c o") 'newline-without-break-of-line)
+
+;; insert new line above without breaking the current line
+(defun fred-newline-here ()
+
+  "1. move to end of the line.
+  2. insert newline with index"
+  (interactive)
+  (let ((oldpos (point)))
+    (beginning-of-line)
+    (newline-and-indent)
+    (previous-line)
+    (indent-relative)))
+
+(global-set-key (kbd "C-c i") 'fred-newline-here)
+
+(global-set-key (kbd "C-x p") 'pop-to-mark-command)
+(setq set-mark-command-repeat-pop t)
+
+
+
+(defun fred-move-beginning-next-line ()
+  "1. move to end of the line.
+  2. insert newline with index"
+  (interactive)
+  (let ((oldpos (point)))
+    (beginning-of-line)
+    (next-line)
+    (beginning-of-line-text)
+    )
+  )
+(global-set-key (kbd "C-c a") 'fred-move-beginning-next-line)
+
+;;(elpy-enable)
 
 (setq ess-packages
   '(
@@ -340,6 +434,9 @@ any user code."
 
 ;;(setq ivy-use-virtual-buffers t)
 ;;(setq enable-recursive-minibuffers t)
+
+
+(add-to-list 'load-path "~/icons-in-terminal/")
 
 
 (defun ess/init-ess ()
@@ -461,6 +558,66 @@ any user code."
 (global-set-key (kbd "M-ç") 'kill-whole-line)
 
 
+(global-set-key (kbd "C-h") 'backward-delete-char)
+
+
+
+
+(defun avy-flash ()
+  (interactive)
+  (set-face-attribute 'mode-line nil :background "#50AA50")
+  (run-with-timer 0.25 nil 'set-face-attribute 'mode-line nil :background "grey75")
+  (avy-goto-char-timer))
+
+(defun my-restart-python-console ()
+  "Restart python console before evaluate buffer or region to avoid various uncanny conflicts, like not reloding modules even when they are changed"
+  (interactive)
+  (kill-process "Python")
+  (sleep-for 0.05)
+  (kill-buffer "*Python*")
+  ;;(elpy-shell-send-region-or-buffer)
+  )
+
+(global-set-key (kbd "M-é") 'my-restart-python-console)
+
+
+(defun quick-copy-line ()
+  "Copy the whole line that point is on and move to the beginning of the next line.
+    Consecutive calls to this command append each line to the
+    kill-ring."
+  (interactive)
+  (let ((beg (line-beginning-position 1))
+        (end (line-beginning-position 2)))
+    (if (eq last-command 'quick-copy-line)
+        (kill-append (buffer-substring beg end) (< end beg))
+      (kill-new (buffer-substring beg end))))
+  (beginning-of-line 2))
+
+
+(global-set-key (kbd "C-c C-g") 'quick-copy-line)
+
+;; AVY shortcut keys for inline navigation
+(global-set-key (kbd "C-,") 'avy-goto-line)
+(global-set-key (kbd "C-;") 'avy-goto-char)
+(global-set-key (kbd "C-:") 'avy-goto-char-2)
+(global-set-key (kbd "C-=") 'avy-move-region)
+
+
+
+;;(use-package eyebrowse
+(global-set-key (kbd "M-s M-1") 'eyebrowse-switch-to-window-config-1)
+(global-set-key (kbd "M-s M-2") 'eyebrowse-switch-to-window-config-2)
+(global-set-key (kbd "M-s M-3") 'eyebrowse-switch-to-window-config-3)
+(global-set-key (kbd "M-s M-4") 'eyebrowse-switch-to-window-config-4)
+
+
+(global-set-key (kbd "C-4") 'er/expand-region)
+
+
+
+
+
+
 (defun rmd-mode ()
   "ESS Markdown mode for rmd files"
   (interactive)
@@ -476,6 +633,14 @@ any user code."
   (interactive "sHeader: ")
   (insert (concat "```{r " header "}\n\n```"))
   (forward-line -1))
+
+
+(defun r-comment (comment)
+  "Insert an r-coment block"
+  (interactive "sComment: ")
+  (insert (concat "###----------------------------------\n##\n## " comment
+                  "\n##\n###----------------------------------"))
+  )
 
 (defun r-clear-workspace ()
   (interactive)
@@ -496,21 +661,50 @@ any user code."
 (defun emacs-single-quote-right ()
   (interactive)
   (insert ")")
- )
+  )
+
+
 (global-set-key (kbd "C-)") 'emacs-single-quote-right)
+
+
+(global-set-key (kbd "M-f") 'evil-forward-word-begin)
+
+
+(when (require 'browse-kill-ring nil 'noerror)
+  (browse-kill-ring-default-keybindings))
+
+(setq browse-kill-ring-highlight-current-entry t)
+
+(global-set-key (kbd "M-y") 'browse-kill-ring)
+
+
 
 
 
 (global-set-key (kbd "C-'") 'r-chunk)
 (global-set-key (kbd "M-o") 'ace-window)
-(setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+
+
+(defalias 'redo 'undo-tree-redo)
+(global-set-key (kbd "C-c u") 'undo)
+(global-set-key (kbd "C-c r") 'redo)
+
+
+(setq aw-keys '(?q ?s ?d ?f ?g ?h ?j ?k ?l))
 
 (setq aw-background nil)
 
 
+
+
+
+
+(setq ess-use-auto-complete t)
+
+
 (defun mark-whole-word (&optional arg allow-extend)
   "Like `mark-word', but selects whole words and skips over whitespace.
-If you use a negative prefix arg then select words backward.
+If you use a negative prefix arg then select wordss backward.
 Otherwise select them forward.
 
 If cursor starts in the middle of word then select that whole word.
@@ -537,9 +731,9 @@ selects backward.)"
     (mark-word arg allow-extend)))
 
 (global-set-key [remap mark-word] 'mark-whole-word)
-(global-set-key (kbd "C-h")  'mark-word)
+;;(global-set-key (kbd "C-h")  'mark-word)
 
-(defun clear-shell ()
+(defun clear-shell()
    (interactive)
    (let ((old-max comint-buffer-maximum-size))
      (setq comint-buffer-maximum-size 0)
@@ -548,7 +742,7 @@ selects backward.)"
 
 (global-set-key (kbd "C-Q")  'clear-shell)
 
-
+(add-hook 'python-mode-hook 'jedi:setup)
 
 (global-set-key "\C-s" 'swiper)
 (global-set-key (kbd "C-c C-r") 'ivy-resume)
@@ -575,11 +769,40 @@ selects backward.)"
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(ansi-color-faces-vector
+   [default bold shadow italic underline bold bold-italic bold])
+ '(custom-safe-themes
+   (quote
+    ("3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" "fa2b58bb98b62c3b8cf3b6f02f058ef7827a8e497125de0254f56e373abee088" "39a854967792547c704cbff8ad4f97429f77dfcf7b3b4d2a62679ecd34b608da" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "a24c5b3c12d147da6cef80938dca1223b7c7f70f2f382b26308eba014dc4833a" "732b807b0543855541743429c9979ebfb363e27ec91e82f463c91e68c772f6e3" default)))
+ '(evil-want-Y-yank-to-eol t)
+ '(fci-rule-color "#37474f" t)
+ '(hl-sexp-background-color "#1c1f26")
  '(package-selected-packages
    (quote
-    (org-mime jedi jedi-core python-environment epc concurrent elpy find-file-in-project ein skewer-mode request-deferred websocket deferred js2-mode simple-httpd ghub let-alist ctable yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional helm-pydoc cython-mode company-anaconda anaconda-mode pythonic org-category-capture toml-mode racer flycheck-rust seq cargo rust-mode undo-tree winum unfill fuzzy diminish f log4e s web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data goto-chg packed evil avy markdown-mode alert bind-key bind-map magit-popup powerline request auctex company with-editor projectile org highlight dash pcache flyspell-correct async auto-complete iedit smartparens yaml-mode paradox org-plus-contrib helm-ag expand-region evil-matchit ess flycheck yasnippet helm helm-core magit spacemacs-theme zenburn-theme xterm-color ws-butler window-numbering which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spinner spaceline solarized-theme smeargle shell-pop restart-emacs rainbow-delimiters quelpa popwin polymode persp-mode pcre2el orgit org-projectile org-present org-pomodoro org-download org-bullets open-junk-file neotree mwim multi-term move-text monokai-theme mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum linum-relative link-hint julia-mode info+ indent-guide ido-vertical-mode hydra hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-company helm-c-yasnippet google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-commit gh-md flyspell-correct-helm flycheck-pos-tip flx-ido fill-column-indicator fancy-battery eyebrowse exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-object-popup ess-R-data-view eshell-z eshell-prompt-extras esh-help elisp-slime-nav dumb-jump define-word company-statistics company-auctex column-enforce-mode clean-aindent-mode auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell))))
+    (org-mime jedi jedi-core python-environment epc concurrent elpy find-file-in-project ein skewer-mode request-deferred websocket deferred js2-mode simple-httpd ghub let-alist ctable yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional helm-pydoc cython-mode company-anaconda anaconda-mode pythonic org-category-capture toml-mode racer flycheck-rust seq cargo rust-mode undo-tree winum unfill fuzzy diminish f log4e s web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data goto-chg packed evil avy markdown-mode alert bind-key bind-map magit-popup powerline request auctex company with-editor projectile org highlight dash pcache flyspell-correct async auto-complete iedit smartparens yaml-mode paradox org-plus-contrib helm-ag expand-region evil-matchit ess flycheck yasnippet helm helm-core magit spacemacs-theme zenburn-theme xterm-color ws-butler window-numbering which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spinner spaceline solarized-theme smeargle shell-pop restart-emacs rainbow-delimiters quelpa popwin polymode persp-mode pcre2el orgit org-projectile org-present org-pomodoro org-download org-bullets open-junk-file neotree mwim multi-term move-text monokai-theme mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum linum-relative link-hint julia-mode info+ indent-guide ido-vertical-mode hydra hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-company helm-c-yasnippet google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-commit gh-md flyspell-correct-helm flycheck-pos-tip flx-ido fill-column-indicator fancy-battery eyebrowse exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-object-popup ess-R-data-view eshell-z eshell-prompt-extras esh-help elisp-slime-nav dumb-jump define-word company-statistics company-auctex column-enforce-mode clean-aindent-mode auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+ '(vc-annotate-background nil)
+ '(vc-annotate-color-map
+   (quote
+    ((20 . "#f36c60")
+     (40 . "#ff9800")
+     (60 . "#fff59d")
+     (80 . "#8bc34a")
+     (100 . "#81d4fa")
+     (120 . "#4dd0e1")
+     (140 . "#b39ddb")
+     (160 . "#f36c60")
+     (180 . "#ff9800")
+     (200 . "#fff59d")
+     (220 . "#8bc34a")
+     (240 . "#81d4fa")
+     (260 . "#4dd0e1")
+     (280 . "#b39ddb")
+     (300 . "#f36c60")
+     (320 . "#ff9800")
+     (340 . "#fff59d")
+     (360 . "#8bc34a"))))
+ '(vc-annotate-very-old-color nil))
 (custom-set-faces
- ;; custom-set-faces was added by Custom.
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
