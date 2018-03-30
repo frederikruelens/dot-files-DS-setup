@@ -61,7 +61,7 @@ You should not put any user code in this function besides modifying the
    ivy
    polymode
    better-defaults
-   jedi
+   ;;jedi
    material-theme
    elpy
    py-autopep8
@@ -390,6 +390,19 @@ any user code."
     (end-of-line)
     (newline-and-indent)))
 (global-set-key (kbd "C-c o") 'newline-without-break-of-line)
+
+
+(defun freddy-python-shell-send-region-or-line nil
+  "Sends from python-mode buffer to a python shell, intelligently."
+  (interactive)
+  (cond ((region-active-p)
+         (setq deactivate-mark t)
+         (python-shell-send-region (region-beginning) (region-end))
+         (python-nav-forward-statement)
+         ) (t (elpy-shell-send-statement))))
+
+
+
 
 ;; insert new line above without breaking the current line
 (defun fred-newline-here ()
@@ -742,7 +755,7 @@ selects backward.)"
 
 (global-set-key (kbd "C-Q")  'clear-shell)
 
-(add-hook 'python-mode-hook 'jedi:setup)
+;;(add-hook 'python-mode-hook 'jedi:setup)
 
 (global-set-key "\C-s" 'swiper)
 (global-set-key (kbd "C-c C-r") 'ivy-resume)
@@ -760,6 +773,9 @@ selects backward.)"
 (global-set-key (kbd "C-x l") 'counsel-locate)
 (global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
 (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history)
+
+(setenv "WORKON_HOME" "/home/fruelens/anaconda2/envs")
+;;(pyvenv-mode 1)
 
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -779,7 +795,7 @@ selects backward.)"
  '(hl-sexp-background-color "#1c1f26")
  '(package-selected-packages
    (quote
-    (org-mime jedi jedi-core python-environment epc concurrent elpy find-file-in-project ein skewer-mode request-deferred websocket deferred js2-mode simple-httpd ghub let-alist ctable yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional helm-pydoc cython-mode company-anaconda anaconda-mode pythonic org-category-capture toml-mode racer flycheck-rust seq cargo rust-mode undo-tree winum unfill fuzzy diminish f log4e s web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data goto-chg packed evil avy markdown-mode alert bind-key bind-map magit-popup powerline request auctex company with-editor projectile org highlight dash pcache flyspell-correct async auto-complete iedit smartparens yaml-mode paradox org-plus-contrib helm-ag expand-region evil-matchit ess flycheck yasnippet helm helm-core magit spacemacs-theme zenburn-theme xterm-color ws-butler window-numbering which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spinner spaceline solarized-theme smeargle shell-pop restart-emacs rainbow-delimiters quelpa popwin polymode persp-mode pcre2el orgit org-projectile org-present org-pomodoro org-download org-bullets open-junk-file neotree mwim multi-term move-text monokai-theme mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum linum-relative link-hint julia-mode info+ indent-guide ido-vertical-mode hydra hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-company helm-c-yasnippet google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-commit gh-md flyspell-correct-helm flycheck-pos-tip flx-ido fill-column-indicator fancy-battery eyebrowse exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-object-popup ess-R-data-view eshell-z eshell-prompt-extras esh-help elisp-slime-nav dumb-jump define-word company-statistics company-auctex column-enforce-mode clean-aindent-mode auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+    (org-mime python-environment epc concurrent elpy find-file-in-project ein skewer-mode request-deferred websocket deferred js2-mode simple-httpd ghub let-alist ctable yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional helm-pydoc cython-mode company-anaconda anaconda-mode pythonic org-category-capture toml-mode racer flycheck-rust seq cargo rust-mode undo-tree winum unfill fuzzy diminish f log4e s web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data goto-chg packed evil avy markdown-mode alert bind-key bind-map magit-popup powerline request auctex company with-editor projectile org highlight dash pcache flyspell-correct async auto-complete iedit smartparens yaml-mode paradox org-plus-contrib helm-ag expand-region evil-matchit ess flycheck yasnippet helm helm-core magit spacemacs-theme zenburn-theme xterm-color ws-butler window-numbering which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spinner spaceline solarized-theme smeargle shell-pop restart-emacs rainbow-delimiters quelpa popwin polymode persp-mode pcre2el orgit org-projectile org-present org-pomodoro org-download org-bullets open-junk-file neotree mwim multi-term move-text monokai-theme mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum linum-relative link-hint julia-mode info+ indent-guide ido-vertical-mode hydra hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-company helm-c-yasnippet google-translate golden-ratio gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-commit gh-md flyspell-correct-helm flycheck-pos-tip flx-ido fill-column-indicator fancy-battery eyebrowse exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-magit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu ess-smart-equals ess-R-object-popup ess-R-data-view eshell-z eshell-prompt-extras esh-help elisp-slime-nav dumb-jump define-word company-statistics company-auctex column-enforce-mode clean-aindent-mode auto-yasnippet auto-highlight-symbol auto-dictionary auto-compile auctex-latexmk aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
  '(vc-annotate-background nil)
  '(vc-annotate-color-map
    (quote
@@ -801,7 +817,8 @@ selects backward.)"
      (320 . "#ff9800")
      (340 . "#fff59d")
      (360 . "#8bc34a"))))
- '(vc-annotate-very-old-color nil))
+ '(vc-annotate-very-old-color nil)
+ '(virtualenv-root "/home/fruelens/"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

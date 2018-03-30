@@ -17,7 +17,7 @@
 
 (dotimes (n 10)
   (global-unset-key (kbd (format "M-%d" n))))
-  
+
 (setq gc-cons-threshold 100000000)
 
 (defconst spacemacs-version         "0.200.13" "Spacemacs version.")
@@ -90,6 +90,15 @@
 (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save)
 (setq py-autopep8-options '("--max-line-length=120"))
 
+(setenv "WORKON_HOME" "/home/fruelens/anaconda2/envs")
+(pyvenv-mode 1)
+
+(use-package pyvenv
+        :ensure t
+        :init
+        (setenv "WORKON_HOME" "/home/fruelens/anaconda2/envs")
+        (pyvenv-mode 1)
+        (pyvenv-tracking-mode 1))
 
 ;; --------------------
 ;; Key Chords
@@ -104,8 +113,8 @@
 (setq key-chord-one-key-delay 0.2) ; default 0.2
 
 (key-chord-define-global "jk" 'undo)
-(key-chord-define-global " b" 'split-window-below)
-(key-chord-define-global " r" 'split-window-right)
+(key-chord-define-global "xb" 'split-window-below)
+(key-chord-define-global "xr" 'split-window-right)
 (key-chord-define-global "qq" 'er/expand-region)
 (key-chord-define-global "hh" 'mark-whole-buffer)
 (key-chord-define-global "yy" 'mc/edit-lines)
@@ -129,5 +138,3 @@
 ;----------------------
 
 ;; init.el ends here
-
-
