@@ -1,3 +1,8 @@
+This reposository contains the dot files for all my data science projects
+- emacs
+- vim 
+- zshell
+
 
 # Emacs setup for data science
 
@@ -17,5 +22,12 @@ Functionality and keybidings
 - copy selection: M-w
 
 
+# Vim
 
+- to do
+
+
+# zshell
+
+- to do
 
