@@ -2,6 +2,7 @@ This reposository contains the dot files for all my data science projects
 - emacs
 - vim 
 - zshell
+- tmux
 
 
 # Emacs setup for data science
