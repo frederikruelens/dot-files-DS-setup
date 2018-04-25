@@ -110,3 +110,4 @@ export PATH="/home/fruelens/anaconda2/bin:$PATH"
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias slido='pdftk *pdf cat output slides.pdf'
+alias ctrl='setxkbmap -option ctrl:nocaps'
