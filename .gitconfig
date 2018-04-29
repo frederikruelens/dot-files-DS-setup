@@ -1,0 +1,35 @@
+[http]
+	sslverify = false
+
+
+
+[alias]
+lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr, %cn)%Creset' --abbrev-commit --date=relative
+hist = log --graph --pretty=format:'%h %ad | %s%d [%an]' --date=short
+last = log -1 HEAD
+unstage = reset HEAD --
+amend = commit --amend -C HEAD
+co = checkout
+ci = commit
+st = status
+br = branch
+
+
+[color]
+    ui = true
+
+[color "branch"]
+    current = yellow reverse
+    local = yello
+    remote = green
+
+[color "diff"]
+    meta = yellow bold
+    frag = magenta bold
+    old = red bold
+    new = green bold
+
+[color "status"]
+    added = yellow
+    changed = green
+    untracked = red
