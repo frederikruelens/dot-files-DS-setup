@@ -11,6 +11,11 @@
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
 
+# Set my current project
+export CURRENT_PROJECT="stuff"
+export CURRENT_ENV="stuff"
+
+
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-zsh is loaded.
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
@@ -111,3 +116,8 @@ export PATH="/home/fruelens/anaconda2/bin:$PATH"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 alias slido='pdftk *pdf cat output slides.pdf'
 alias ctrl='setxkbmap -option ctrl:nocaps'
+
+
+# projects
+alias project="cd ~/Dropbox/work/Projects/$CURRENT_PROJECT"
+alias miniconda='source ~/miniconda3/bin/activate; source activate $CURRENT_ENV'
