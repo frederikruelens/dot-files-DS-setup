@@ -121,3 +121,5 @@ alias ctrl='setxkbmap -option ctrl:nocaps'
 # projects
 alias project="cd ~/Dropbox/work/Projects/$CURRENT_PROJECT"
 alias miniconda='source ~/miniconda3/bin/activate; source activate $CURRENT_ENV'
+
+alias jup='jupyter lab'
