@@ -122,6 +122,9 @@ alias ctrl='setxkbmap -option ctrl:nocaps'
 alias project="cd ~/Dropbox/work/Projects/$CURRENT_PROJECT"
 alias miniconda='source ~/miniconda3/bin/activate; source activate $CURRENT_ENV'
 
-alias jup='jupyter lab'
+#alias jup='jupyter lab'
 alias tw='tmux new-session -s work'
 alias taw='tmux attach -t work'
+
+alias jup_chrome='google-chrome --app=http://localhost:8888/lab'
+alias jup='jupyter lab --no-browser;jup_chrome'
